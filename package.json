@@ -7,7 +7,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "dev": "nodemon --exec ts-node --esm src/index.ts",
+"dev": "nodemon",
     "build": "tsc",
     "start": "node dist/index.js",
     "db:push": "drizzle-kit push --config=drizzle.config.ts",
@@ -20,7 +20,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/owinogabriel/flowboard-server/issues"
   },
