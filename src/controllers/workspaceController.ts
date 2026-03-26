@@ -134,7 +134,7 @@ export const createWorkspace = async (
  * Updates name, description, and/or color of a workspace.
  * Only the workspace owner is permitted to make changes.
  */
-export const updateWorksapce = async (
+export const updateWorkspace = async (
   req: AuthRequest,
   res: Response,
 ): Promise<void> => {
