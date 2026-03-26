@@ -1,15 +1,18 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './swagger.js'
 dotenv.config()
 
+import logger from './middleware/logger.js'
+import errorHandler from './middleware/errorHandler.js'
+import authRoutes from './routes/authRoutes.js'
 import workspaceRoutes from './routes/workspaceRoutes.js'
 import projectRoutes from './routes/projectRoutes.js'
 import taskRoutes from './routes/taskRoutes.js'
 import memberRoutes from './routes/memberRoutes.js'
-import logger from './middleware/logger.js'
-import errorHandler from './middleware/errorHandler.js'
-import authRoutes from './routes/authRoutes.js'
+
 const app = express()
 const PORT = process.env.PORT || 3000
 
@@ -21,8 +24,15 @@ app.use(cors({
 app.use(express.json())
 app.use(logger)
 
+// Swagger docs
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
 app.get('/', (req, res) => {
-  res.json({ success: true, message: "Flowboard API is running! 🚀" })
+  res.json({
+    success: true,
+    message: "Flowboard API is running! 🚀",
+    docs: `http://localhost:${PORT}/api/docs`
+  })
 })
 
 app.use('/api/auth', authRoutes)
@@ -39,4 +49,5 @@ app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`✅ Flowboard API running on http://localhost:${PORT}`)
+  console.log(`📄 API Docs at http://localhost:${PORT}/api/docs`)
 })
