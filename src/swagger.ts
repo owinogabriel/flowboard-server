@@ -32,7 +32,7 @@ A fully featured project management API with workspaces, projects, tasks and tea
         description: 'Development server'
       },
       {
-        url: 'https://your-render-url.onrender.com',
+        url: 'https://flowboard-api-cbmg.onrender.com/',
         description: 'Production server'
       }
     ],
