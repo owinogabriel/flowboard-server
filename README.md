@@ -344,7 +344,7 @@ This API is deployed on **Render** with a managed PostgreSQL database.
 ## Frontend
 
 The frontend client for this API is available at:
-[flowboard-web](https://github.com/YOUR_USERNAME/flowboard-web)
+[flowboard-web](https://github.com/owinogabrie/flowboard-web)
 
 ---
 
