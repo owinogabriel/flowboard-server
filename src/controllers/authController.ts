@@ -145,3 +145,50 @@ export const updateProfile = async (
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+// Firebase sync - called after Firebase login/register
+export const firebaseSync = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { name, email, avatar, firebaseUid } = req.body
+
+    if (!email) {
+      res.status(400).json({ success: false, message: "Email is required" })
+      return
+    }
+
+    // Check if user exists
+    let user = await db.select().from(users).where(eq(users.email, email))
+
+    if (!user.length) {
+      // Create new user — no password needed since Firebase handles auth
+      const newUser = await db.insert(users)
+        .values({
+          name: name || email.split('@')[0],
+          email,
+          password: firebaseUid, // store firebase uid as password placeholder
+          avatar: avatar || null
+        })
+        .returning()
+
+      user = newUser
+    }
+
+    // Generate our own JWT for API calls
+    const token = generateToken(user[0].id)
+
+    res.json({
+      success: true,
+      message: "Sync successful",
+      token,
+      user: {
+        id: user[0].id,
+        name: user[0].name,
+        email: user[0].email,
+        avatar: user[0].avatar
+      }
+    })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}

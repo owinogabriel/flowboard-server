@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { register, login, getMe, updateProfile } from '../controllers/authController.js'
+import { register, login, getMe, updateProfile, firebaseSync } from '../controllers/authController.js'
 import requireAuth from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
 import { registerSchema, loginSchema } from '../schemas/authSchema.js'
@@ -147,5 +147,6 @@ router.get('/me', requireAuth, getMe)
  *         description: Not authorized
  */
 router.put('/me', requireAuth, updateProfile)
+router.post('/firebase-sync', firebaseSync)
 
 export default router
