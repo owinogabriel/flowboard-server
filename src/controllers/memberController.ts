@@ -46,7 +46,11 @@ export const addMember = async (
     const user = await db.select().from(users).where(eq(users.email, email));
 
     if (!user.length) {
-      res.status(404).json({ success: false, message: "User not found" });
+      res.status(404).json({
+        success: false,
+        message:
+          "No Flowboard account found with that email. Ask them to sign up first.",
+      });
       return;
     }
 
