@@ -57,8 +57,14 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
+    console.log("Login attempt:", email);
+    console.log("Password received:", password?.substring(0, 10));
+
     const result = await db.select().from(users).where(eq(users.email, email));
     const user = result[0];
+
+    console.log("User found:", !!user);
+    console.log("Stored password:", user?.password?.substring(0, 10));
 
     if (!user) {
       res
@@ -67,17 +73,18 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    // Try bcrypt compare first (normal password)
     let isPasswordValid = false;
     try {
       isPasswordValid = await bcrypt.compare(password, user.password);
-    } catch {
+      console.log("Bcrypt result:", isPasswordValid);
+    } catch (e: any) {
+      console.log("Bcrypt error:", e.message);
       isPasswordValid = false;
     }
 
-    // If bcrypt fails try direct comparison (Firebase UID stored as plain)
     if (!isPasswordValid) {
       isPasswordValid = user.password === password;
+      console.log("Direct compare result:", isPasswordValid);
     }
 
     if (!isPasswordValid) {
@@ -101,10 +108,10 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
+    console.log("Login error:", error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await db
