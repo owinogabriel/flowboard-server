@@ -4,11 +4,18 @@ import { Pool } from "pg";
 import * as schema from "./schema.js";
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+
+// Test connection on startup
+pool.on("error", (err) => {
+  console.error("Database pool error:", err.message);
 });
 
 const db = drizzle(pool, { schema });
