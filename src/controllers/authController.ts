@@ -67,11 +67,24 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Try bcrypt compare first (normal password)
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await bcrypt.compare(password, user.password);
+    } catch {
+      isPasswordValid = false;
+    }
+
+    // If bcrypt fails try direct comparison (Firebase UID stored as plain)
+    if (!isPasswordValid) {
+      isPasswordValid = user.password === password;
+    }
+
     if (!isPasswordValid) {
       res
         .status(401)
         .json({ success: false, message: "Invalid email or password" });
+      return;
     }
 
     const token = generateToken(user.id);
@@ -146,36 +159,39 @@ export const updateProfile = async (
   }
 };
 
-
 // Firebase sync - called after Firebase login/register
-export const firebaseSync = async (req: AuthRequest, res: Response): Promise<void> => {
+export const firebaseSync = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
   try {
-    const { name, email, avatar, firebaseUid } = req.body
+    const { name, email, avatar, firebaseUid } = req.body;
 
     if (!email) {
-      res.status(400).json({ success: false, message: "Email is required" })
-      return
+      res.status(400).json({ success: false, message: "Email is required" });
+      return;
     }
 
     // Check if user exists
-    let user = await db.select().from(users).where(eq(users.email, email))
+    let user = await db.select().from(users).where(eq(users.email, email));
 
     if (!user.length) {
       // Create new user — no password needed since Firebase handles auth
-      const newUser = await db.insert(users)
+      const newUser = await db
+        .insert(users)
         .values({
-          name: name || email.split('@')[0],
+          name: name || email.split("@")[0],
           email,
           password: firebaseUid, // store firebase uid as password placeholder
-          avatar: avatar || null
+          avatar: avatar || null,
         })
-        .returning()
+        .returning();
 
-      user = newUser
+      user = newUser;
     }
 
     // Generate our own JWT for API calls
-    const token = generateToken(user[0].id)
+    const token = generateToken(user[0].id);
 
     res.json({
       success: true,
@@ -185,10 +201,10 @@ export const firebaseSync = async (req: AuthRequest, res: Response): Promise<voi
         id: user[0].id,
         name: user[0].name,
         email: user[0].email,
-        avatar: user[0].avatar
-      }
-    })
+        avatar: user[0].avatar,
+      },
+    });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message })
+    res.status(500).json({ success: false, message: error.message });
   }
-}
+};
